@@ -4,12 +4,23 @@ set fish_status_color magenta
 
 function parse_git_branch
   set -l branch (git branch 2> /dev/null | grep -e '\* ' | sed 's/^..\(.*\)/\1/')
-  set -l git_diff (git diff)
+  if math (string length $branch)" > 16" >/dev/null
+    set -l branch (string sub -s 1 -l 9 $branch)..(string sub -s (math (string length $branch) - 3) -l 4 $branch)
+    set -l git_diff (git diff)
 
-  if test -n "$git_diff"
-    echo " ["(set_color $fish_git_dirty_color)$branch(set_color normal)"]"
+    if test -n "$git_diff"
+      echo " ["(set_color $fish_git_dirty_color)$branch(set_color normal)"]"
+    else
+      echo " ["(set_color $fish_git_not_dirty_color)$branch(set_color normal)"]"
+    end
   else
-    echo " ["(set_color $fish_git_not_dirty_color)$branch(set_color normal)"]"
+    set -l git_diff (git diff)
+
+    if test -n "$git_diff"
+      echo " ["(set_color $fish_git_dirty_color)$branch(set_color normal)"]"
+    else
+      echo " ["(set_color $fish_git_not_dirty_color)$branch(set_color normal)"]"
+    end
   end
 end
 
