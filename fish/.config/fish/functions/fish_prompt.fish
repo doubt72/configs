@@ -4,23 +4,15 @@ set fish_status_color magenta
 
 function parse_git_branch
   set -l branch (git branch 2> /dev/null | grep -e '\* ' | sed 's/^..\(.*\)/\1/')
-  if math (string length $branch)" > 16" >/dev/null
-    set -l branch (string sub -s 1 -l 9 $branch)..(string sub -s (math (string length $branch) - 3) -l 4 $branch)
-    set -l git_diff (git diff)
+  if math (string length $branch)" > 15" >/dev/null
+    set branch (string sub -s 1 -l 9 $branch)..(string sub -s (math (string length $branch) - 3) -l 4 $branch)
+  end
+  set -l git_diff (git diff)
 
-    if test -n "$git_diff"
-      echo " ["(set_color $fish_git_dirty_color)$branch(set_color normal)"]"
-    else
-      echo " ["(set_color $fish_git_not_dirty_color)$branch(set_color normal)"]"
-    end
+  if test -n "$git_diff"
+    echo " ["(set_color $fish_git_dirty_color)$branch(set_color normal)
   else
-    set -l git_diff (git diff)
-
-    if test -n "$git_diff"
-      echo " ["(set_color $fish_git_dirty_color)$branch(set_color normal)"]"
-    else
-      echo " ["(set_color $fish_git_not_dirty_color)$branch(set_color normal)"]"
-    end
+    echo " ["(set_color $fish_git_not_dirty_color)$branch(set_color normal)
   end
 end
 
@@ -52,14 +44,16 @@ function fish_prompt --description 'Write out the prompt'
 
   set -l prompt_status
   if test $last_status -ne 0
-    set prompt_status " ("(set_color $fish_status_color) "$last_status" "$normal" ")"
+    set prompt_status ":"(set_color $fish_status_color) "$last_status" "$normal" "]"
+  else
+    set prompt_status "]"
   end
 
   set -l mode_str
   set -l git_dir (git rev-parse --git-dir 2> /dev/null)
   if test -n "$git_dir"
-    echo -n -s "[" (date +%H:%M) "] " (set_color $color_cwd) (prompt_pwd) $normal (parse_git_branch) $normal $prompt_status "$mode_str" "> "
+    echo -n -s (date +%H:%M) " " (set_color $color_cwd) (prompt_pwd) $normal (parse_git_branch) $normal $prompt_status "$mode_str" " "
   else
-    echo -n -s "[" (date +%H:%M) "] " (set_color $color_cwd) (prompt_pwd) $normal $prompt_status "$mode_str" "> "
+    echo -n -s (date +%H:%M) " " (set_color $color_cwd) (prompt_pwd) $normal $prompt_status "$mode_str" " "
   end
 end
